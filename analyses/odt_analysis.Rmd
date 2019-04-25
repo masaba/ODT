@@ -1,0 +1,321 @@
+---
+title: "SAT Analysis"
+author: "Mika Asaba (masaba@stanford.edu)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    highlight: pygments
+    theme: flatly
+    toc: yes
+    toc_float: true
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+Libraries.
+```{r echo=FALSE, message=FALSE}
+rm(list=ls())
+
+knitr::opts_chunk$set(fig.width=8, fig.height=5, 
+                      echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+
+library(psych)
+library(langcog)
+library(tidyverse)
+library(ggthemes)
+library(lme4)
+library(lmerTest)
+library(readxl)
+library(here)
+library(janitor)
+library(viridis)
+```
+
+Experiment 1
+----------------------------------------
+Read in file.
+```{r, message=FALSE}
+exp1.raw = read_excel("../data/ODT_data.xlsx",sheet=2)
+```
+
+
+Clean file.
+```{r}
+exp1.clean = exp1.raw %>%
+  mutate(memory_correct = ifelse((condition == "Better" & memory == "good") | condition == "Worse" & memory == "bad", TRUE, FALSE),
+         chose_drawing = choice == "drawing")
+```
+
+Filter subjects.
+```{r}
+exp1.filt = exp1.clean %>%
+  filter(memory_correct == TRUE, warmup == "good", include == "y")
+
+exp1.filt.hyo = exp1.clean %>%
+  filter(memory_correct == TRUE, warmup == "good", include == "y", self_evaluation_best == "good")
+
+exp1.all = exp1.clean %>%
+  filter(warmup == "good", include == "y")
+```
+
+Tidy data.
+```{r}
+exp1.evaluations = exp1.filt %>%
+  select(video_id, age, age_bin, condition,other_evaluation_best, other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
+  gather("other_self","evaluation", other_evaluation_best,other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
+  mutate(best_worst = other_self,
+         other_self = str_sub(other_self,1,4),
+         other_self = factor(other_self, levels=c("othe","self"),labels=c("other","self")),
+         best_worst = str_sub(best_worst,-4),
+         best_worst = factor(best_worst, levels=c("best","orst"),labels=c("best","worst")))
+
+exp1.evaluations.filt = exp1.filt %>%
+  select(video_id, age, age_bin, condition,other_evaluation_best, other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
+  filter(self_evaluation_best == "good") %>%
+  gather("other_self","evaluation", other_evaluation_best,other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
+  mutate(best_worst = other_self,
+         other_self = str_sub(other_self,1,4),
+         other_self = factor(other_self, levels=c("othe","self"),labels=c("other","self")),
+         best_worst = str_sub(best_worst,-4),
+         best_worst = factor(best_worst, levels=c("best","orst"),labels=c("best","worst")))
+
+
+```
+
+### Demographics
+```{r}
+exp1.dems = exp1.filt %>%
+  summarise(num_age = n(),
+            avg_age = mean(age),
+            sd_age = sd(age),
+            min_age = min(age),
+            max_age = max(age))
+exp1.dems
+```
+
+### Counterbalancing
+```{r}
+table(exp1.filt$condition, exp1.filt$age_bin)
+```
+
+
+### Plots
+
+Primary DV: Blocks or drawing?
+```{r}
+# Table w/ means and CIs
+exp1.means = exp1.filt %>%
+  group_by(condition) %>%
+  multi_boot_standard(col = "chose_drawing") 
+exp1.means
+
+# Table w/ counts and means
+exp1.counts = exp1.filt %>%
+  group_by(condition,chose_drawing) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+exp1.counts
+
+#Plot color
+ggplot() + 
+  geom_bar(data=exp1.counts, aes(x = factor(condition), y = freq, fill=chose_drawing), stat="identity",width=.5) + 
+  geom_linerange(data = exp1.means, mapping=aes(x = factor(condition), ymin = ci_lower, ymax = ci_upper))+
+  xlab("") + 
+  ylab("Choice of Tasks") +
+  geom_hline(yintercept=.5, linetype="dotted") +
+  ylim(0,1) +
+  theme(text = element_text(size=20)) +
+  theme_few() +
+  scale_fill_manual(values=c("#999999","#0072B2"))
+
+
+# Table w/ means and CIs
+exp1.means = exp1.filt %>%
+  group_by(age_bin,condition) %>%
+  multi_boot_standard(col = "chose_drawing") 
+exp1.means
+
+# Table w/ counts and means
+exp1.counts = exp1.filt %>%
+  group_by(age_bin,condition,chose_drawing) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+exp1.counts
+
+#Plot color
+ggplot() + 
+  geom_bar(data=exp1.counts, aes(x = factor(condition), y = freq, fill=chose_drawing), stat="identity",width=.5) + 
+  geom_linerange(data = exp1.means, mapping=aes(x = factor(condition), ymin = ci_lower, ymax = ci_upper))+
+  xlab("") + 
+  ylab("Choice of Tasks") +
+  geom_hline(yintercept=.5, linetype="dotted") +
+  ylim(0,1) +
+  theme(text = element_text(size=20)) +
+  theme_few() +
+  scale_fill_manual(values=c("#999999","#0072B2")) +
+  facet_grid(~ age_bin)
+```
+
+
+
+
+BY AGE: Primary DV: Blocks or drawing?
+```{r}
+# Table w/ means and CIs
+exp1.means = exp1.all %>%
+  group_by(condition) %>%
+  multi_boot_standard(col = "chose_drawing") 
+exp1.means
+
+# Table w/ counts and means
+exp1.counts = exp1.all %>%
+  group_by(condition,chose_drawing) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+exp1.counts
+
+#Plot color
+ggplot() + 
+  geom_bar(data=exp1.counts, aes(x = factor(condition), y = freq, fill=chose_drawing), stat="identity",width=.5) + 
+  geom_linerange(data = exp1.means, mapping=aes(x = factor(condition), ymin = ci_lower, ymax = ci_upper))+
+  xlab("") + 
+  ylab("Choice of Tasks") +
+  geom_hline(yintercept=.5, linetype="dotted") +
+  ylim(0,1) +
+ # guides(fill=guide_legend(title=NULL)) +
+  theme(text = element_text(size=20)) +
+  theme_few() +
+  scale_fill_manual(values=c("#999999","#0072B2"))
+```
+
+FILTERING KIDS WHO SCRIBBLED
+```{r}
+exp1.worst = exp1.filt %>%
+   select(other_evaluation, other_evaluation_worst) %>%
+  mutate(other_worst = other_evaluation_worst == "other") %>%
+  filter(other_worst == TRUE) %>%
+  select(other_evaluation)
+
+exp1.best = exp1.filt %>%
+   select(other_evaluation, other_evaluation_best) %>%
+  mutate(other_best = other_evaluation_best == "other") %>%
+  filter(other_best== TRUE) %>%
+  select(other_evaluation)
+
+exp1.filtworst = exp1.filt %>%
+  filter(condition == "Worse") %>%
+  mutate(is.inc = video_id %in% exp1.worse$other_evaluation) %>%
+  filter(is.inc == FALSE)
+
+exp1.filtbest = exp1.filt %>%
+  filter(condition == "Better") %>%
+  mutate(is.inc = video_id %in% exp1.best$other_evaluation) %>%
+  filter(is.inc == FALSE)
+
+exp1.filtmiddle = full_join(exp1.filtworst, exp1.filtbest)
+
+exp1.dems = exp1.filt.hyo %>%
+  group_by(age_bin) %>%
+  summarise(num_age = n(),
+            avg_age = mean(age),
+            sd_age = sd(age),
+            min_age = min(age),
+            max_age = max(age))
+exp1.dems
+
+# Table w/ means and CIs
+exp1.means = exp1.filt.hyo %>%
+  group_by(age_bin,condition) %>%
+  multi_boot_standard(col = "chose_drawing") 
+exp1.means
+
+# Table w/ counts and means
+exp1.counts = exp1.filt.hyo %>%
+  group_by(age_bin,condition,chose_drawing) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n/sum(n))
+exp1.counts
+
+#Plot color
+ggplot() + 
+  geom_bar(data=exp1.counts, aes(x = factor(condition), y = freq, fill=chose_drawing), stat="identity",width=.5) + 
+  geom_linerange(data = exp1.means, mapping=aes(x = factor(condition), ymin = ci_lower, ymax = ci_upper))+
+  xlab("") + 
+  ylab("Choice of Tasks") +
+  geom_hline(yintercept=.5, linetype="dotted") +
+  ylim(0,1) +
+ # guides(fill=guide_legend(title=NULL)) +
+  theme(text = element_text(size=20)) +
+  theme_few() +
+  scale_fill_manual(values=c("#999999","#0072B2")) +
+  facet_grid(~ age_bin)
+```
+
+Evaluation questions.
+```{r}
+#filter kids who said that the best drawing was the best in the other condition
+
+exp1.evaluations.filt = filter(exp1.evaluations, best_worst == "best" & evaluation == "good")
+
+ggplot() + 
+  geom_bar(data=exp1.evaluations, aes(x = factor(best_worst), fill=evaluation), width=.5) +
+  facet_grid(~ other_self) +
+  theme_few() +
+  scale_color_viridis() +
+  facet_grid(other_self~ condition ~ age_bin)
+
+ggplot() + 
+  geom_bar(data=exp1.evaluations, aes(x = factor(best_worst), fill=evaluation), width=.5) +
+  facet_grid(~ other_self) +
+  theme_few() +
+  scale_color_viridis() +
+  facet_grid(other_self~ age_bin)
+
+
+
+```
+
+### Analyses
+Mixed-effects model
+```{r}
+summary(glmer(chose_drawing ~ condition + age + 
+               (1|video_id), 
+               data = exp1.filt, 
+               family = "binomial"))
+```
+
+Fisher's Exact
+```{r}
+#make table with counts of children who chose fail and success confederates
+exp1.n = exp1.filt %>%
+  group_by(condition) %>%
+  summarise(num_chose_drawing = sum(chose_drawing),
+            num_chose_blocks = n() - sum(chose_drawing))
+exp1.n
+
+#remove condition column
+exp1.fisher = select(exp1.n, num_chose_drawing, num_chose_blocks)
+
+#run test
+fisher.test(exp1.fisher)
+```
+
+
+Binomial Tests
+```{r}
+#Better Condition
+binom.test(exp1.n$num_chose_drawing[1], exp1.n$num_chose_drawing[1] + exp1.n$num_chose_blocks[1])
+
+#Worse Condition
+binom.test(exp1.n$num_chose_drawing[2], exp1.n$num_chose_drawing[2] + exp1.n$num_chose_blocks[2])
+```
+
+
+Future conditions to run: 
+1. "Worse" Worse condition: have 3 yr olds draw their friend's face (i.e., something easier than a tree)
+2. Control for Better condition: children are not just threatened -- if the better drawing is the experimenter, then they might choose drawing more often
+3. Make children choose to draw even when the experimenter has an inflated belief about them (i.e., when they don't want to make their friend feel bad, or when the experimenter can teach them about drawing)
+
+

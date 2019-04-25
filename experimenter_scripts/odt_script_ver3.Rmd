@@ -1,0 +1,137 @@
+---
+title: "Omission Drawing Task Ver3"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+## Conditions
+**Better** Condition: E2 thinks child made amazing drawing.
+
+**Worse** Condition: E2 thinks child made really poor drawing.
+
+## Script
+
+### Introduction
+
+E1: Hi [child’s name]! Today we are going to do some drawing together! Do you like drawing? Cool!
+
+E1: I have a friend named Sharon (bring out picture of E2 and put it in front of child). See? That’s Sharon!
+
+E1: "I think Sharon might want to play with us later. Does that sound okay?"
+
+*If child says no:*
+E1: “Do you think it would be okay if Sharon came in just for a little bit?”
+
+*If child says no again:*
+E1: “Do you want to go back to the classroom?”
+
+### Card Sorting
+
+E1: Before we draw, we are going to sort these cards into different piles. You can put the red cards here, and the blue cards here. Just like this! (demonstrate one blue card and one red card).
+
+E1: Can you try sorting the rest of the cards?
+
+### Check Question
+
+E1: Okay cool! Now let’s look at some other kids’ drawings first, okay?
+[bring out good drawing and bad drawing that will be used in the manipulation phase]
+
+E1: These kids were drawing people. Here is this person (point to drawing) and here is this person (point to drawing). Which one is better?
+
+If child points to better drawing:
+E1: Yes this one is better. Why is this one better?
+
+If child points to worse drawing:
+E1: Actually, this one is better. Why is this one better?
+
+E1: [repeat child’s explanation] Okay cool!
+
+### Child Drawing
+
+E1: Okay! Now it’s your turn to draw a person!
+
+[Give child a piece of paper]
+
+E1: When you are all done, you can leave it right here, okay? You can let me know when you’re finished! I’ll just be working on something else right over here. [move across the room to a different table, take warm-up drawings with you]
+
+[child works on drawing]
+
+E1: All done? Great!
+
+### E2 Evaluation 
+
+[E1 moves back to main table (standing over the table) and starts shuffling all three drawings together, leaving the good drawing (BETTER Condition) or bad drawing (WORSE Condition) on the top. While E1 is shuffling the papers, E1 calls E2 in.]
+
+E1: I think [E2] wants to come in now! [E2], is that you?
+
+[E2 comes in]
+
+E1: [E2], this is [child’s name]!
+
+E2: Hi [child’s name]! I’m [E2]!
+
+E1: [child’s name] and I were just making some drawings. [Child’s name] just made a drawing. It’s on the table! I’ll be working over here.
+
+[E2 picks up drawings and looks at the one on the top. The child can only see the back of the drawings (so, assumes that E2 is looking at their drawing)]
+
+E2: Let me take a look! Oh oops, I have to go... I'll be right back! 
+
+[E2 leaves; E1 comes back to table]
+
+### Reveal of Drawing
+
+E1: Oh oops, this is the drawing that [E2] was looking at!
+
+[child responds]
+
+E1: I think [E2] is about to come back in now.
+
+[E2 comes back in and E1 moves back to table]
+
+### Test Question
+E1: You know what [child's name]? When E2 comes back, you can do drawing or sorting with her. Which one do you want to do? 
+
+*If child does not choose*:
+E2: “Do you want to do drawing or sort cards with E2?”
+
+*If child wants to do both*:
+E2: “If you had to choose just one, which one do you want to do with E2?”
+
+### Memory Check Question
+
+E1: “Okay I have another question for you. Remember when [E2] first came in and was looking at the drawings? Which one was she looking at? This one, this one, or this one?” 
+
+[child responds]
+
+E1: “That one? And which one did you really make?”
+
+[child responds]
+
+### Evaluation Questions
+
+[Take out another kid’s drawing and put away participant’s drawing. Keep manipulation drawings on the table]
+
+E1: And here’s another child’s drawing. Which drawing is the best drawing of a person? This one, this one, or this one?
+
+E1: Which drawing is the worst, or a not very good drawing of a person? This one, this one, or this one?
+
+[put child’s drawing on table; remove other kids’ drawing]
+
+E1: Okay great! And which drawing is the best drawing of a person? This one, this one, or this one?
+
+E1: Which drawing is the worst, or a not very good drawing of a person? This one, this one, or this one?
+
+*If children chose the good tree as the "best"" and the bad one as the "worst":*
+
+E1: Okay! Oh... you know what I just realized? This one [the better one] was actually made by an adult! Oops!
+
+E1: Okay great, that’s the end of my game, thanks for playing with me!
+
+### Demonstration
+
+E1: Now it's time for Sharon to come back in! Sharon, is that you? 
+
+E2: Hi! Let's do some [drawing or sorting].
+
