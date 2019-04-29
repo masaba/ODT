@@ -99,6 +99,8 @@ E2: “Do you want to do drawing or sort cards with E2?”
 *If child wants to do both*:
 E2: “If you had to choose just one, which one do you want to do with E2?”
 
+E1: Why do you want to do X?
+
 ### Memory Check Question
 
 E1: “Okay I have another question for you. Remember when [E2] first came in and was looking at the drawings? Which one was she looking at? This one, this one, or this one?” 
@@ -126,8 +128,6 @@ E1: Which drawing is the worst, or a not very good drawing of a person? This one
 *If children chose the good tree as the "best"" and the bad one as the "worst":*
 
 E1: Okay! Oh... you know what I just realized? This one [the better one] was actually made by an adult! Oops!
-
-E1: Okay great, that’s the end of my game, thanks for playing with me!
 
 ### Demonstration
 
