@@ -53,11 +53,32 @@ Filter subjects.
 exp1.filt = exp1.clean %>%
   filter(memory_correct == TRUE, warmup == "good", include == "y")
 
-exp1.filt.hyo = exp1.clean %>%
-  filter(memory_correct == TRUE, warmup == "good", include == "y", self_evaluation_best == "good")
+exp1.filt.4 = filter(exp1.filt, age >= 4, age < 5)
 
 exp1.all = exp1.clean %>%
   filter(warmup == "good", include == "y")
+
+exp1.best.self.filt = exp1.filt %>%
+  filter(condition == "Better", self_evaluation_best == "own")
+
+exp1.worst.self.filt = exp1.filt %>%
+  filter(condition == "Worse", self_evaluation_worst == "bad")
+
+exp1.self.middle = full_join(exp1.best.self.filt, exp1.worst.self.filt)
+
+exp1.yoked.best = exp1.filt %>%
+  filter(condition == "Better", yoked_evaluation_best == "good")
+
+exp1.yoked.best = exp1.filt %>%
+  filter(condition == "Better", yoked_evaluation_best == "good")
+
+exp1.yoked.worst = exp1.filt %>%
+  filter(condition == "Worse", yoked_evaluation_worst == "bad")
+
+exp1.yoked.middle = full_join(exp1.yoked.best, exp1.yoked.worst)
+
+#exp1.filt.bestcorr = exp1.clean %>%
+ # filter(memory_correct == TRUE, warmup == "good", include == "y", self_evaluation_best == "good")
 ```
 
 Tidy data.
@@ -71,17 +92,15 @@ exp1.evaluations = exp1.filt %>%
          best_worst = str_sub(best_worst,-4),
          best_worst = factor(best_worst, levels=c("best","orst"),labels=c("best","worst")))
 
-exp1.evaluations.filt = exp1.filt %>%
+exp1.evaluations.filt = exp1.filt.bestcorr %>%
   select(video_id, age, age_bin, condition,other_evaluation_best, other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
-  filter(self_evaluation_best == "good") %>%
+ # filter(self_evaluation_best == "good") %>%
   gather("other_self","evaluation", other_evaluation_best,other_evaluation_worst, self_evaluation_best, self_evaluation_worst) %>%
   mutate(best_worst = other_self,
          other_self = str_sub(other_self,1,4),
          other_self = factor(other_self, levels=c("othe","self"),labels=c("other","self")),
          best_worst = str_sub(best_worst,-4),
          best_worst = factor(best_worst, levels=c("best","orst"),labels=c("best","worst")))
-
-
 ```
 
 ### Demographics
@@ -127,8 +146,9 @@ ggplot() +
   geom_hline(yintercept=.5, linetype="dotted") +
   ylim(0,1) +
   theme(text = element_text(size=20)) +
-  theme_few() +
-  scale_fill_manual(values=c("#999999","#0072B2"))
+  theme_minimal() +
+  scale_fill_manual(values=c("lightsteelblue2","#0072B2"))
+#  guides(fill=FALSE)
 
 
 # Table w/ means and CIs
@@ -153,24 +173,30 @@ ggplot() +
   geom_hline(yintercept=.5, linetype="dotted") +
   ylim(0,1) +
   theme(text = element_text(size=20)) +
-  theme_few() +
-  scale_fill_manual(values=c("#999999","#0072B2")) +
+  theme_minimal() +
+  scale_fill_manual(values=c("lightsteelblue2","#0072B2")) +
   facet_grid(~ age_bin)
+  #guides(fill=FALSE)
 ```
 
-
-
-
-BY AGE: Primary DV: Blocks or drawing?
+FILTERING KIDS WHO RATED THEMSELVES AS IN THE MIDDLE
 ```{r}
-# Table w/ means and CIs
-exp1.means = exp1.all %>%
+exp1.dems = exp1.self.middle%>%
+  group_by(age_bin) %>%
+  summarise(num_age = n(),
+            avg_age = mean(age),
+            sd_age = sd(age),
+            min_age = min(age),
+            max_age = max(age))
+exp1.dems
+
+exp1.means = exp1.self.middle %>%
   group_by(condition) %>%
   multi_boot_standard(col = "chose_drawing") 
 exp1.means
 
 # Table w/ counts and means
-exp1.counts = exp1.all %>%
+exp1.counts = exp1.self.middle %>%
   group_by(condition,chose_drawing) %>%
   summarise(n = n()) %>%
   mutate(freq = n/sum(n))
@@ -187,36 +213,12 @@ ggplot() +
  # guides(fill=guide_legend(title=NULL)) +
   theme(text = element_text(size=20)) +
   theme_few() +
-  scale_fill_manual(values=c("#999999","#0072B2"))
+  scale_fill_manual(values=c("lightsteelblue2","#0072B2"))
 ```
 
-FILTERING KIDS WHO SCRIBBLED
+FILTERING KIDS WHO OTHERS RATED AS IN THE MIDDLE
 ```{r}
-exp1.worst = exp1.filt %>%
-   select(other_evaluation, other_evaluation_worst) %>%
-  mutate(other_worst = other_evaluation_worst == "other") %>%
-  filter(other_worst == TRUE) %>%
-  select(other_evaluation)
-
-exp1.best = exp1.filt %>%
-   select(other_evaluation, other_evaluation_best) %>%
-  mutate(other_best = other_evaluation_best == "other") %>%
-  filter(other_best== TRUE) %>%
-  select(other_evaluation)
-
-exp1.filtworst = exp1.filt %>%
-  filter(condition == "Worse") %>%
-  mutate(is.inc = video_id %in% exp1.worse$other_evaluation) %>%
-  filter(is.inc == FALSE)
-
-exp1.filtbest = exp1.filt %>%
-  filter(condition == "Better") %>%
-  mutate(is.inc = video_id %in% exp1.best$other_evaluation) %>%
-  filter(is.inc == FALSE)
-
-exp1.filtmiddle = full_join(exp1.filtworst, exp1.filtbest)
-
-exp1.dems = exp1.filt.hyo %>%
+exp1.dems = exp1.yoked.middle%>%
   group_by(age_bin) %>%
   summarise(num_age = n(),
             avg_age = mean(age),
@@ -225,15 +227,14 @@ exp1.dems = exp1.filt.hyo %>%
             max_age = max(age))
 exp1.dems
 
-# Table w/ means and CIs
-exp1.means = exp1.filt.hyo %>%
+exp1.means = exp1.yoked.middle %>%
   group_by(age_bin,condition) %>%
   multi_boot_standard(col = "chose_drawing") 
 exp1.means
 
 # Table w/ counts and means
-exp1.counts = exp1.filt.hyo %>%
-  group_by(age_bin,condition,chose_drawing) %>%
+exp1.counts = exp1.yoked.middle %>%
+  group_by(condition,chose_drawing) %>%
   summarise(n = n()) %>%
   mutate(freq = n/sum(n))
 exp1.counts
@@ -249,7 +250,7 @@ ggplot() +
  # guides(fill=guide_legend(title=NULL)) +
   theme(text = element_text(size=20)) +
   theme_few() +
-  scale_fill_manual(values=c("#999999","#0072B2")) +
+  scale_fill_manual(values=c("lightsteelblue2","#0072B2")) +
   facet_grid(~ age_bin)
 ```
 
@@ -261,13 +262,12 @@ exp1.evaluations.filt = filter(exp1.evaluations, best_worst == "best" & evaluati
 
 ggplot() + 
   geom_bar(data=exp1.evaluations, aes(x = factor(best_worst), fill=evaluation), width=.5) +
-  facet_grid(~ other_self) +
   theme_few() +
   scale_color_viridis() +
-  facet_grid(other_self~ condition ~ age_bin)
+  facet_grid(~ other_self)
 
 ggplot() + 
-  geom_bar(data=exp1.evaluations, aes(x = factor(best_worst), fill=evaluation), width=.5) +
+  geom_bar(data=exp1.evaluations.filt, aes(x = factor(best_worst), fill=evaluation), width=.5) +
   facet_grid(~ other_self) +
   theme_few() +
   scale_color_viridis() +
@@ -280,9 +280,16 @@ ggplot() +
 ### Analyses
 Mixed-effects model
 ```{r}
-summary(glmer(chose_drawing ~ condition + age + 
-               (1|video_id), 
+summary(glm(chose_drawing ~ condition + age,
                data = exp1.filt, 
+               family = "binomial"))
+
+summary(glm(chose_drawing ~ condition + age,
+               data = exp1.self.middle, 
+               family = "binomial"))
+
+summary(glm(chose_drawing ~ condition + age,
+               data = exp1.yoked.middle, 
                family = "binomial"))
 ```
 
@@ -290,6 +297,19 @@ Fisher's Exact
 ```{r}
 #make table with counts of children who chose fail and success confederates
 exp1.n = exp1.filt %>%
+  group_by(condition) %>%
+  summarise(num_chose_drawing = sum(chose_drawing),
+            num_chose_blocks = n() - sum(chose_drawing))
+exp1.n
+
+#remove condition column
+exp1.fisher = select(exp1.n, num_chose_drawing, num_chose_blocks)
+
+#run test
+fisher.test(exp1.fisher)
+
+#make table with counts of children who chose fail and success confederates
+exp1.n = exp1.filt.4 %>%
   group_by(condition) %>%
   summarise(num_chose_drawing = sum(chose_drawing),
             num_chose_blocks = n() - sum(chose_drawing))
